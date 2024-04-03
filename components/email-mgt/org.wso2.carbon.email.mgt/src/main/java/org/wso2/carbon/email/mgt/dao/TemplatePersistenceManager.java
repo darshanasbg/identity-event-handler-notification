@@ -29,7 +29,6 @@ import java.util.List;
  */
 public interface TemplatePersistenceManager {
 
-
     /**
      * Add a notification template type to given tenant.
      *
@@ -42,30 +41,18 @@ public interface TemplatePersistenceManager {
     void addNotificationTemplateType(String displayName, String notificationChannel, String applicationUuid,
                                      String tenantDomain) throws NotificationTemplateManagerServerException;
 
+    /**
+     * Check whether the given notification template type exists for given tenant.
+     * @param displayName           Display name of the template type.
+     * @param notificationChannel   Notification channel.
+     * @param applicationUuid       Application UUID.
+     * @param tenantDomain          Tenant domain.
+     * @return True if the template type exists, false otherwise.
+     * @throws NotificationTemplateManagerServerException If an error occurred while checking the existence of the template
+     */
     boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel, String applicationUuid,
                                           String tenantDomain) throws NotificationTemplateManagerServerException;
 
-    /**
-     * Delete a notification template from given tenant.
-     *
-     * @param displayName           Display name of the template type.
-     * @param notificationChannel   Notification channel.
-     * @param tenantDomain          Tenant domain.
-     * @throws NotificationTemplateManagerServerException If an error occurred while deleting the template type.
-     */
-    void deleteNotificationTemplateTypeByName(String displayName, String notificationChannel, String tenantDomain)
-            throws NotificationTemplateManagerServerException;
-
-    /**
-     * Get all notification template types for given tenant.
-     *
-     * @param notificationChannel   Notification channel.
-     * @param tenantDomain          Tenant domain.
-     * @return                      List of available template types.
-     * @throws NotificationTemplateManagerServerException If an error occurred while retrieving the template types.
-     */
-    List<String> getNotificationTemplateTypes(String notificationChannel, String tenantDomain)
-            throws NotificationTemplateManagerServerException;
 
     /**
      * Check whether the given notification template type exists for given tenant.
@@ -81,6 +68,28 @@ public interface TemplatePersistenceManager {
             throws NotificationTemplateManagerServerException;
 
     /**
+     * Get all notification template types for given tenant.
+     *
+     * @param notificationChannel   Notification channel.
+     * @param tenantDomain          Tenant domain.
+     * @return                      List of available template types.
+     * @throws NotificationTemplateManagerServerException If an error occurred while retrieving the template types.
+     */
+    List<String> listNotificationTemplateTypes(String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException;
+
+    /**
+     * Delete a notification template from given tenant.
+     *
+     * @param displayName           Display name of the template type.
+     * @param notificationChannel   Notification channel.
+     * @param tenantDomain          Tenant domain.
+     * @throws NotificationTemplateManagerServerException If an error occurred while deleting the template type.
+     */
+    void deleteNotificationTemplateTypeByName(String displayName, String notificationChannel, String tenantDomain)
+            throws NotificationTemplateManagerServerException;
+
+    /**
      * Update a notification template is exists or add a new template if not exists for given tenant.
      *
      * @param notificationTemplate  Notification template.
@@ -90,6 +99,36 @@ public interface TemplatePersistenceManager {
      */
     void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                          String tenantDomain) throws NotificationTemplateManagerServerException;
+
+    /**
+     * Check whether the given notification template exists for given tenant.
+     *
+     * @param displayName           Display Name.
+     * @param locale                Locale of the template.
+     * @param notificationChannel   Notification channel.
+     * @param applicationUuid       Application UUID.
+     * @param tenantDomain          Tenant domain.
+     * @return True if the template exists, false otherwise.
+     * @throws NotificationTemplateManagerServerException If an error occurred while checking the existence of the template.
+     */
+    boolean isNotificationTemplateExists(String displayName, String locale, String notificationChannel,
+                                         String applicationUuid, String tenantDomain)
+            throws NotificationTemplateManagerServerException;
+
+    /**
+     * Get a notification template from given tenant.
+     *
+     * @param displayName           Display Name.
+     * @param locale                Locale of the template.
+     * @param notificationChannel   Notification channel.
+     * @param applicationUuid       Application UUID.
+     * @param tenantDomain          Tenant domain.
+     * @return Notification template.
+     * @throws NotificationTemplateManagerServerException If an error occurred while retrieving the template.
+     */
+    NotificationTemplate getNotificationTemplate(String displayName, String locale, String notificationChannel,
+                                                 String applicationUuid, String tenantDomain)
+            throws NotificationTemplateManagerServerException;
 
     /**
      * Delete a notification template from given tenant.
@@ -128,36 +167,6 @@ public interface TemplatePersistenceManager {
     void deleteNotificationTemplates(String displayName, String notificationChannel, String applicationUuid,
                                      String tenantDomain) throws NotificationTemplateManagerServerException;
 
-    /**
-     * Get a notification template from given tenant.
-     *
-     * @param displayName           Display Name.
-     * @param locale                Locale of the template.
-     * @param notificationChannel   Notification channel.
-     * @param applicationUuid       Application UUID.
-     * @param tenantDomain          Tenant domain.
-     * @return Notification template.
-     * @throws NotificationTemplateManagerServerException If an error occurred while retrieving the template.
-     */
-    NotificationTemplate getNotificationTemplate(String displayName, String locale, String notificationChannel,
-                                                 String applicationUuid, String tenantDomain)
-            throws NotificationTemplateManagerServerException;
-
-    /**
-     * Check whether the given notification template exists for given tenant.
-     *
-     * @param displayName           Display Name.
-     * @param locale                Locale of the template.
-     * @param notificationChannel   Notification channel.
-     * @param applicationUuid       Application UUID.
-     * @param tenantDomain          Tenant domain.
-     * @return True if the template exists, false otherwise.
-     * @throws NotificationTemplateManagerServerException If an error occurred while checking the existence of the template.
-     */
-    boolean isNotificationTemplateExists(String displayName, String locale, String notificationChannel,
-                                         String applicationUuid, String tenantDomain)
-            throws NotificationTemplateManagerServerException;
-
     // Email template related methods
 
     /**
@@ -178,9 +187,6 @@ public interface TemplatePersistenceManager {
      * @return List of available email templates.
      * @throws NotificationTemplateManagerServerException If an error occurred while retrieving the templates.
      */
-    List<EmailTemplate> getEmailTemplates(String templateType, String applicationUuid, String tenantDomain)
+    List<EmailTemplate> listEmailTemplates(String templateType, String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException;
-
-
-
 }

@@ -62,7 +62,6 @@ import static org.wso2.carbon.registry.core.RegistryConstants.PATH_SEPARATOR;
  */
 public class EmailTemplateManagerImpl implements EmailTemplateManager, NotificationTemplateManager {
 
-    private I18nMgtDataHolder dataHolder = I18nMgtDataHolder.getInstance();
     private TemplatePersistenceManager notificationTemplateDAO = new RegistryBasedTemplateManager();
 
     private static final Log log = LogFactory.getLog(EmailTemplateManagerImpl.class);
@@ -161,7 +160,7 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
     public List<String> getAvailableTemplateTypes(String tenantDomain) throws I18nEmailMgtServerException {
 
         try {
-            return notificationTemplateDAO.getNotificationTemplateTypes(NotificationChannels.EMAIL_CHANNEL.getChannelType(),
+            return notificationTemplateDAO.listNotificationTemplateTypes(NotificationChannels.EMAIL_CHANNEL.getChannelType(),
                     tenantDomain);
         } catch (NotificationTemplateManagerServerException ex) {
             String errorMsg = String.format("Error when retrieving email template types of %s tenant.", tenantDomain);
@@ -201,13 +200,14 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
         validateTemplateType(templateDisplayName, tenantDomain);
 
         try {
-            if (!notificationTemplateDAO.isNotificationTemplateTypeExists(templateDisplayName,NotificationChannels.EMAIL_CHANNEL.getChannelType(), null, tenantDomain)) {
+            if (!notificationTemplateDAO.isNotificationTemplateTypeExists(templateDisplayName,
+                    NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain)) {
                 String message =
                         String.format("Email Template Type: %s not found in %s tenant registry.", templateDisplayName,
                                 tenantDomain);
                 throw new I18nEmailMgtClientException(EMAIL_TEMPLATE_TYPE_NOT_FOUND, message);
             }
-            return notificationTemplateDAO.getEmailTemplates(templateDisplayName, applicationUuid, tenantDomain);
+            return notificationTemplateDAO.listEmailTemplates(templateDisplayName, applicationUuid, tenantDomain);
         } catch (NotificationTemplateManagerServerException ex) {
             String error = "Error when retrieving '%s' template type from %s tenant registry.";
             throw new I18nEmailMgtServerException(String.format(error, templateDisplayName, tenantDomain), ex);
@@ -325,16 +325,12 @@ public class EmailTemplateManagerImpl implements EmailTemplateManager, Notificat
 
         validateTemplateType(templateTypeName, tenantDomain);
 
-        String templateType = I18nEmailUtil.getNormalizedName(templateTypeName);
-        String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateType + APP_TEMPLATE_PATH +
-                PATH_SEPARATOR + applicationUuid;
-
         try {
             notificationTemplateDAO.deleteNotificationTemplates(templateTypeName,
                     NotificationChannels.EMAIL_CHANNEL.getChannelType(), applicationUuid, tenantDomain);
         } catch (NotificationTemplateManagerServerException ex) {
             String errorMsg = String.format("Error deleting email template type %s from %s tenant for application %s.",
-                    templateType, tenantDomain, applicationUuid);
+                    templateTypeName, tenantDomain, applicationUuid);
             handleServerException(errorMsg, ex);
         }
     }

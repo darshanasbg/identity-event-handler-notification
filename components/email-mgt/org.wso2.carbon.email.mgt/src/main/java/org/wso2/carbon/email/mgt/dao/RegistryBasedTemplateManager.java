@@ -25,16 +25,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
 import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtException;
-import org.wso2.carbon.email.mgt.exceptions.I18nEmailMgtServerException;
 import org.wso2.carbon.email.mgt.internal.I18nMgtDataHolder;
 import org.wso2.carbon.email.mgt.model.EmailTemplate;
 import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
-import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerClientException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
-import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerInternalException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 import org.wso2.carbon.identity.governance.service.notification.NotificationChannels;
@@ -71,10 +68,10 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
                                             String tenantDomain) throws NotificationTemplateManagerServerException {
 
         String normalizedDisplayName = I18nEmailUtil.getNormalizedName(displayName);
-
-        // Persist the template type to registry ie. create a directory.
         String path = buildTemplateRootDirectoryPath(normalizedDisplayName, notificationChannel, applicationUuid);
+
         try {
+            // Persist the template type to registry ie. create a directory.
             Collection collection = I18nEmailUtil.createTemplateType(normalizedDisplayName, displayName);
             resourceMgtService.putIdentityResource(collection, path, tenantDomain);
         } catch (IdentityRuntimeException e) {
@@ -87,9 +84,8 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
                                             String tenantDomain) throws NotificationTemplateManagerServerException {
 
         String normalizedDisplayName = I18nEmailUtil.getNormalizedName(displayName);
-
-        // Persist the template type to registry ie. create a directory.
         String path = buildTemplateRootDirectoryPath(normalizedDisplayName, notificationChannel, applicationUuid);
+
         try {
             // Check whether a template exists with the same name.
             return resourceMgtService.isResourceExists(path, tenantDomain);
@@ -105,7 +101,9 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             throws NotificationTemplateManagerServerException {
 
         String templateType = I18nEmailUtil.getNormalizedName(displayName);
+        // TODO: Generalize for any notification channel
         String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateType;
+//        String path = buildTemplateRootDirectoryPath(templateType, notificationChannel);;
 
         try {
             resourceMgtService.deleteIdentityResource(path, tenantDomain);
@@ -115,11 +113,12 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
     }
 
     @Override
-    public List<String> getNotificationTemplateTypes(String notificationChannel, String tenantDomain)
+    public List<String> listNotificationTemplateTypes(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
         try {
             List<String> templateTypeList = new ArrayList<>();
+            // TODO: Generalize for any notification channel
             Collection collection = (Collection) resourceMgtService.getIdentityResource(EMAIL_TEMPLATE_PATH,
                     tenantDomain);
 
@@ -132,8 +131,7 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             }
             return templateTypeList;
         } catch (IdentityRuntimeException | RegistryException e) {
-            throw new NotificationTemplateManagerServerException("Error while retrieving notification template types.",
-                    e);
+            throw new NotificationTemplateManagerServerException("Error while listing notification template types.", e);
         }
     }
 
@@ -146,8 +144,7 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
         String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + normalizedTemplateName;
 
         try {
-            Resource templateType = resourceMgtService.getIdentityResource(path, tenantDomain);
-            return templateType != null;
+            return resourceMgtService.isResourceExists(path, tenantDomain);
         } catch (IdentityRuntimeException e) {
             String error = String.format("Error when retrieving email templates of %s tenant.", tenantDomain);
             throw new NotificationTemplateManagerServerException(error, e);
@@ -166,7 +163,6 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
         String locale = notificationTemplate.getLocale();
 
         String path = buildTemplateRootDirectoryPath(type, notificationChannel, applicationUuid);
-
         try {
             // Check whether a template type root directory exists.
             if (!resourceMgtService.isResourceExists(path, tenantDomain)) {
@@ -189,15 +185,15 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             throws NotificationTemplateManagerServerException {
 
         String templateType = I18nEmailUtil.getNormalizedName(displayName);
-        String path = notificationChannel + PATH_SEPARATOR + templateType + getApplicationPath(applicationUuid);
+        // TODO: Generalize for any notification channel
+        String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateType + getApplicationPath(applicationUuid);
         try {
             resourceMgtService.deleteIdentityResource(path, tenantDomain, locale);
-        } catch (IdentityRuntimeException ex) {
+        } catch (IdentityRuntimeException e) {
             String msg = String.format("Error deleting %s:%s template from %s tenant registry.", displayName,
                     locale, tenantDomain);
-            throw new NotificationTemplateManagerServerException(msg, ex);
+            throw new NotificationTemplateManagerServerException(msg, e);
         }
-
     }
 
     @Override
@@ -205,6 +201,7 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             throws NotificationTemplateManagerServerException {
 
         String templateType = I18nEmailUtil.getNormalizedName(displayName);
+        // TODO: Make generalized for any notification channel
         String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateType;
 
         try {
@@ -225,6 +222,7 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
                                             String tenantDomain) throws NotificationTemplateManagerServerException {
 
         String templateType = I18nEmailUtil.getNormalizedName(displayName);
+        // TODO: Generalize for any notification channel
         String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateType + APP_TEMPLATE_PATH +
                 PATH_SEPARATOR + applicationUuid;
 
@@ -261,13 +259,13 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             if (registryResource != null) {
                 notificationTemplate = getNotificationTemplate(registryResource, notificationChannel);
             }
-        } catch (IdentityRuntimeException exception) {
+        } catch (IdentityRuntimeException e) {
             String error = String
                     .format(IdentityMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_FROM_REGISTRY
                             .getMessage(), displayName, locale, tenantDomain);
             throw new NotificationTemplateManagerServerException(
                     IdentityMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_FROM_REGISTRY.getCode(),
-                    error, exception);
+                    error, e);
         }
 
         return notificationTemplate;
@@ -280,13 +278,15 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
 
         // Get template directory name from display name.
         String normalizedTemplateName = I18nEmailUtil.getNormalizedName(displayName);
-        String path = EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + normalizedTemplateName +
-                getApplicationPath(applicationUuid) + PATH_SEPARATOR + locale.toLowerCase();
+        String path = buildTemplateRootDirectoryPath(normalizedTemplateName, notificationChannel);
+        path = addLocaleToTemplateTypeResourcePath(path, locale);
 
         try {
             return resourceMgtService.isResourceExists(path, tenantDomain);
         } catch (IdentityRuntimeException e) {
-            String error = String.format("Error when retrieving email templates of %s tenant.", tenantDomain);
+            String error =
+                    String.format("Error while checking the existence of the notification template %s in %s tenant.",
+                            displayName, tenantDomain);
             throw new NotificationTemplateManagerServerException(error, e);
         }
     }
@@ -298,6 +298,7 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
         List<EmailTemplate> templateList = new ArrayList<>();
 
         try {
+            // TODO: Generalize for any notification channel
             Collection baseDirectory = (Collection) resourceMgtService.getIdentityResource(EMAIL_TEMPLATE_PATH,
                     tenantDomain);
 
@@ -308,53 +309,30 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
                 }
             }
         } catch (RegistryException | IdentityRuntimeException e) {
-            throw new NotificationTemplateManagerServerException("Error while retrieving email templates.", e);
+            throw new NotificationTemplateManagerServerException("Error while listing all email templates.", e);
         }
 
         return templateList;
     }
 
     @Override
-    public List<EmailTemplate> getEmailTemplates(String s, String applicationUuid, String tenantDomain)
+    public List<EmailTemplate> listEmailTemplates(String templateDisplayName, String applicationUuid,
+                                                  String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        List<EmailTemplate> templateList = new ArrayList<>();
-
-        String templateDirectory = I18nEmailUtil.getNormalizedName(s);
+        String templateDirectory = I18nEmailUtil.getNormalizedName(templateDisplayName);
+        // TODO: Generalize for any notification channel
         String templateTypeRegistryPath =
                 EMAIL_TEMPLATE_PATH + PATH_SEPARATOR + templateDirectory + getApplicationPath(applicationUuid);
-        Collection templateType = (Collection) resourceMgtService.getIdentityResource(templateTypeRegistryPath,
-                tenantDomain);
-
-        // TODO: validate error
-        if (templateType != null) {
-            throw new NotificationTemplateManagerServerException(
-                    String.format("Email template type '%s' not found in tenant '%s'.", s, tenantDomain),
-                    EMAIL_TEMPLATE_TYPE_NOT_FOUND);
-        }
 
         try {
-            for (String template : templateType.getChildren()) {
-                Resource templateResource = resourceMgtService.getIdentityResource(template, tenantDomain);
-                // Exclude the app templates for organization template requests.
-                if (templateResource != null) {
-                    if (templateTypeRegistryPath.contains(APP_TEMPLATE_PATH) ||
-                            !templateResource.getPath().contains(APP_TEMPLATE_PATH)) {
-                        try {
-                            EmailTemplate templateDTO = I18nEmailUtil.getEmailTemplate(templateResource);
-                            templateList.add(templateDTO);
-                        } catch (I18nEmailMgtException e) {
-                            log.error("Failed retrieving a template object from the registry resource", e);
-                        }
-                    }
-                }
-            }
-        } catch (RegistryException ex) {
+            return getAllTemplatesOfTemplateTypeFromRegistry(templateTypeRegistryPath,
+                    tenantDomain);
+        } catch (RegistryException e) {
             String error = "Error when retrieving '%s' template type from %s tenant registry.";
-            throw new NotificationTemplateManagerServerException(String.format(error, s, tenantDomain), ex);
+            throw new NotificationTemplateManagerServerException(
+                    String.format(error, templateDisplayName, tenantDomain), e);
         }
-
-        return templateList;
     }
 
     /**
@@ -545,6 +523,7 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
             //TODO:Validate error
             String type = templateTypeRegistryPath.split(PATH_SEPARATOR)[
                     templateTypeRegistryPath.split(PATH_SEPARATOR).length - 1];
+            // TODO: Generalize the channel type
             String message =
                     String.format("Email Template Type: %s not found in %s tenant registry.", type, tenantDomain);
             throw new NotificationTemplateManagerServerException(EMAIL_TEMPLATE_TYPE_NOT_FOUND, message);
@@ -557,8 +536,8 @@ public class RegistryBasedTemplateManager implements TemplatePersistenceManager 
                 try {
                     EmailTemplate templateDTO = I18nEmailUtil.getEmailTemplate(templateResource);
                     templateList.add(templateDTO);
-                } catch (I18nEmailMgtException ex) {
-                    log.error("Failed retrieving a template object from the registry resource", ex);
+                } catch (I18nEmailMgtException e) {
+                    log.error("Failed retrieving a template object from the registry resource", e);
                 }
             }
         }
