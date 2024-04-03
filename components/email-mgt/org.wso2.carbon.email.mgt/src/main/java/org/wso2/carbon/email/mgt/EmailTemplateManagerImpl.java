@@ -33,7 +33,6 @@ import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
 import org.wso2.carbon.identity.base.IdentityValidationUtil;
 import org.wso2.carbon.identity.core.persistence.registry.RegistryResourceMgtService;
-import org.wso2.carbon.identity.governance.IdentityGovernanceUtil;
 import org.wso2.carbon.identity.governance.IdentityMgtConstants;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerClientException;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerException;
@@ -54,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.APP_TEMPLATE_PATH;
-import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.DEFAULT_SMS_NOTIFICATION_LOCALE;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_NAME;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_PATH;
 import static org.wso2.carbon.email.mgt.constants.I18nMgtConstants.EMAIL_TEMPLATE_TYPE_DISPLAY_NAME;
