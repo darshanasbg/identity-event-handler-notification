@@ -20,10 +20,7 @@ package org.wso2.carbon.email.mgt.dao;
 
 import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
-import org.wso2.carbon.email.mgt.constants.I18nMgtConstants;
-import org.wso2.carbon.email.mgt.util.I18nEmailUtil;
 import org.wso2.carbon.identity.core.util.JdbcUtils;
-import org.wso2.carbon.identity.governance.IdentityMgtConstants;
 import org.wso2.carbon.identity.governance.exceptions.notiification.NotificationTemplateManagerServerException;
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
@@ -70,17 +67,14 @@ public class OrgNotificationTemplateDAO {
                 preparedStatement.setInt(TENANT_ID, tenantId);
             }), notificationTemplate, false);
         } catch (DataAccessException e) {
-            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
-                    I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getCode(),
-                    I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
-            String message =
-                    String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getMessage(),
-                            displayName, locale, tenantId);
-            throw new NotificationTemplateManagerServerException(code, message, e);
+            String error =
+                    String.format("Error while adding %s template %s of type %s to %s tenant.", channelName,
+                            locale, displayName, tenantId);
+            throw new NotificationTemplateManagerServerException(error, e);
         }
     }
 
-    public NotificationTemplate getNotificationTemplate(String locale, String scenarioName, String channelName,
+    public NotificationTemplate getNotificationTemplate(String locale, String templateType, String channelName,
                                                         int tenantId)
             throws NotificationTemplateManagerServerException {
 
@@ -96,30 +90,29 @@ public class OrgNotificationTemplateDAO {
                         notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(locale);
-                        notificationTemplateResult.setType(scenarioName);
-                        notificationTemplateResult.setDisplayName(scenarioName);
+                        notificationTemplateResult.setType(templateType);
+                        // TODO:
+                        notificationTemplateResult.setDisplayName(templateType);
                         return notificationTemplateResult;
                     },
                     preparedStatement -> {
                         preparedStatement.setString(LOCALE, locale);
-                        preparedStatement.setString(TYPE, scenarioName.toLowerCase());
+                        preparedStatement.setString(TYPE, templateType.toLowerCase());
                         preparedStatement.setString(CHANNEL, channelName);
                         preparedStatement.setInt(TENANT_ID, tenantId);
                         preparedStatement.setInt(TENANT_ID, tenantId);
                     });
         } catch (DataAccessException e) {
-            String error = String.format(
-                    IdentityMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_FROM_REGISTRY.getMessage(),
-                    scenarioName, locale, tenantId);
-            throw new NotificationTemplateManagerServerException(
-                    IdentityMgtConstants.ErrorMessages.ERROR_CODE_ERROR_RETRIEVING_TEMPLATE_FROM_REGISTRY.getCode(),
-                    error, e);
+            String error =
+                    String.format("Error while retrieving %s template %s of type %s from %s tenant.", channelName,
+                            locale, templateType, tenantId);
+            throw new NotificationTemplateManagerServerException(error, e);
         }
 
         return notificationTemplate;
     }
 
-    public List<NotificationTemplate> listNotificationTemplates(String scenarioName, String channelName, int tenantId)
+    public List<NotificationTemplate> listNotificationTemplates(String templateType, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
         NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
@@ -134,19 +127,22 @@ public class OrgNotificationTemplateDAO {
                         notificationTemplateResult.setFooter(resultSet.getString(FOOTER));
                         notificationTemplateResult.setContentType(resultSet.getString(CONTENT_TYPE));
                         notificationTemplateResult.setLocale(resultSet.getString(LOCALE));
-                        notificationTemplateResult.setType(scenarioName.toLowerCase());
-                        notificationTemplateResult.setDisplayName(scenarioName);
+                        notificationTemplateResult.setType(templateType.toLowerCase());
+                        // TODO: set display name
+                        notificationTemplateResult.setDisplayName(templateType);
                         return notificationTemplateResult;
                     },
                     preparedStatement -> {
-                        preparedStatement.setString(TYPE, scenarioName.toLowerCase());
+                        preparedStatement.setString(TYPE, templateType.toLowerCase());
                         preparedStatement.setString(CHANNEL, channelName);
                         preparedStatement.setInt(TENANT_ID, tenantId);
                         preparedStatement.setInt(TENANT_ID, tenantId);
                     });
         } catch (DataAccessException e) {
-            String error = "Error when retrieving '%s' template type from %s tenant registry.";
-            throw new NotificationTemplateManagerServerException(String.format(error, scenarioName, tenantId), e);
+            String error =
+                    String.format("Error while listing %s templates %s of type %s from %s tenant.", channelName,
+                            templateType, tenantId);
+            throw new NotificationTemplateManagerServerException(String.format(error, templateType, tenantId), e);
         }
 
         return notificationTemplates;
@@ -174,19 +170,15 @@ public class OrgNotificationTemplateDAO {
                         preparedStatement.setInt(TENANT_ID, tenantId);
                     });
         } catch (DataAccessException e) {
-            // TODO: Verify the error code (kept add error code due to backward compatibility)
-            String code = I18nEmailUtil.prependOperationScenarioToErrorCode(
-                    I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getCode(),
-                    I18nMgtConstants.ErrorScenarios.EMAIL_TEMPLATE_MANAGER);
-            String message =
-                    String.format(I18nMgtConstants.ErrorMessages.ERROR_CODE_ERROR_ERROR_ADDING_TEMPLATE.getMessage(),
-                            displayName, locale, tenantId);
-            throw new NotificationTemplateManagerServerException(code, message, e);
+            String error =
+                    String.format("Error while updating %s template %s of type %s from %s tenant.", channelName, locale,
+                            displayName, tenantId);
+            throw new NotificationTemplateManagerServerException(error, e);
         }
 
     }
 
-    public void removeNotificationTemplate(String locale, String scenarioName, String channelName, int tenantId)
+    public void removeNotificationTemplate(String locale, String templateType, String channelName, int tenantId)
             throws NotificationTemplateManagerServerException {
 
         NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
@@ -194,33 +186,35 @@ public class OrgNotificationTemplateDAO {
             namedJdbcTemplate.executeUpdate(DELETE_ORG_NOTIFICATION_TEMPLATE_SQL,
                     preparedStatement -> {
                         preparedStatement.setString(LOCALE, locale);
-                        preparedStatement.setString(TYPE, scenarioName.toLowerCase());
-                        preparedStatement.setString(CHANNEL, channelName);
-                        preparedStatement.setInt(TENANT_ID, tenantId);
-                        preparedStatement.setInt(TENANT_ID, tenantId);
-                    });
-        } catch (DataAccessException e) {
-            String error = String.format("Error deleting %s:%s template from %s tenant registry.", scenarioName, locale,
-                    tenantId);
-            throw new NotificationTemplateManagerServerException(error, e);
-        }
-    }
-
-    public void removeNotificationTemplates(String scenarioName, String channelName, int tenantId)
-            throws NotificationTemplateManagerServerException {
-
-        NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
-        try {
-            namedJdbcTemplate.executeUpdate(DELETE_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL,
-                    preparedStatement -> {
-                        preparedStatement.setString(TYPE, scenarioName.toLowerCase());
+                        preparedStatement.setString(TYPE, templateType.toLowerCase());
                         preparedStatement.setString(CHANNEL, channelName);
                         preparedStatement.setInt(TENANT_ID, tenantId);
                         preparedStatement.setInt(TENANT_ID, tenantId);
                     });
         } catch (DataAccessException e) {
             String error =
-                    String.format("Error deleting email template type %s from %s tenant.", scenarioName, tenantId);
+                    String.format("Error while deleting %s template %s of type %s from %s tenant.", channelName, locale,
+                            templateType, tenantId);
+            throw new NotificationTemplateManagerServerException(error, e);
+        }
+    }
+
+    public void removeNotificationTemplates(String templateType, String channelName, int tenantId)
+            throws NotificationTemplateManagerServerException {
+
+        NamedJdbcTemplate namedJdbcTemplate = JdbcUtils.getNewNamedJdbcTemplate();
+        try {
+            namedJdbcTemplate.executeUpdate(DELETE_ORG_NOTIFICATION_TEMPLATES_BY_TYPE_SQL,
+                    preparedStatement -> {
+                        preparedStatement.setString(TYPE, templateType.toLowerCase());
+                        preparedStatement.setString(CHANNEL, channelName);
+                        preparedStatement.setInt(TENANT_ID, tenantId);
+                        preparedStatement.setInt(TENANT_ID, tenantId);
+                    });
+        } catch (DataAccessException e) {
+            String error =
+                    String.format("Error while deleting %s templates of type %s from %s tenant.", channelName,
+                            templateType, tenantId);
             throw new NotificationTemplateManagerServerException(error, e);
         }
     }
