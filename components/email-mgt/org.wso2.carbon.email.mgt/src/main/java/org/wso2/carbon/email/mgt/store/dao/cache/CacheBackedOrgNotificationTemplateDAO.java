@@ -47,7 +47,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         super.addNotificationTemplate(notificationTemplate, tenantId);
 
         String locale = notificationTemplate.getLocale();
-        String type = notificationTemplate.getType();
+        String type = notificationTemplate.getType().toLowerCase();
         String channel = notificationTemplate.getNotificationChannel();
 
         OrgNotificationTemplateCacheKey cacheKey = new OrgNotificationTemplateCacheKey(locale, type, channel);
@@ -136,7 +136,7 @@ public class CacheBackedOrgNotificationTemplateDAO extends OrgNotificationTempla
         super.updateNotificationTemplate(notificationTemplate, tenantId);
 
         String locale = notificationTemplate.getLocale();
-        String type = notificationTemplate.getType();
+        String type = notificationTemplate.getType().toLowerCase();
         String channel = notificationTemplate.getNotificationChannel();
 
         OrgNotificationTemplateCacheKey cacheKey = new OrgNotificationTemplateCacheKey(locale, type, channel);

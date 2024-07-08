@@ -236,12 +236,13 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
                                                                 String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
+        String templateTypeKey = templateType.toLowerCase();
         int tenantId = getTenantId(tenantDomain);
 
         List<NotificationTemplate> notificationTemplates;
         if (StringUtils.isBlank(applicationUuid)) {
             notificationTemplates =
-                    orgNotificationTemplateDAO.listNotificationTemplates(templateType, notificationChannel,
+                    orgNotificationTemplateDAO.listNotificationTemplates(templateTypeKey, notificationChannel,
                             tenantId);
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Org %s templates for type: %s for tenant: %s successfully listed.",
@@ -249,7 +250,7 @@ public class DBBasedTemplateManager implements TemplatePersistenceManager {
             }
         } else {
             notificationTemplates =
-                    appNotificationTemplateDAO.listNotificationTemplates(templateType, notificationChannel,
+                    appNotificationTemplateDAO.listNotificationTemplates(templateTypeKey, notificationChannel,
                             applicationUuid, tenantId);
             if (log.isDebugEnabled()) {
                 log.debug(String.format("App %s templates for type: %s for application: %s for tenant: %s " +
