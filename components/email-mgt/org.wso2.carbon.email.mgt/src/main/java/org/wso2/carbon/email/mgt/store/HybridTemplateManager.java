@@ -39,6 +39,7 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     private static final Log log = LogFactory.getLog(HybridTemplateManager.class);
 
     private TemplatePersistenceManager dbBasedTemplateManager = new DBBasedTemplateManager();
+    private TemplatePersistenceManager inMemoryTemplateManager = new InMemoryBasedTemplateManager();
     private TemplatePersistenceManager registryBasedTemplateManager = new RegistryBasedTemplateManager();
 
     @Override
@@ -55,6 +56,8 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
         return dbBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
                 tenantDomain) ||
                 registryBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+                        tenantDomain) ||
+                inMemoryTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
                         tenantDomain);
     }
 
@@ -66,8 +69,10 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
                 tenantDomain);
         List<String> registryBasedTemplateTypes = registryBasedTemplateManager.listNotificationTemplateTypes(notificationChannel,
                 tenantDomain);
+        List<String> inMemoryTemplateTypes = inMemoryTemplateManager.listNotificationTemplateTypes(notificationChannel,
+                tenantDomain);
 
-        return mergeAndRemoveDuplicates(dbBasedTemplateTypes, registryBasedTemplateTypes);
+        return mergeAndRemoveDuplicates(dbBasedTemplateTypes, registryBasedTemplateTypes, inMemoryTemplateTypes);
     }
 
     @Override
@@ -115,6 +120,8 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
         return dbBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain) ||
                 registryBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+                        applicationUuid, tenantDomain) ||
+                inMemoryTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                         applicationUuid, tenantDomain);
     }
 
@@ -127,8 +134,12 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
                 applicationUuid, tenantDomain)) {
             return dbBasedTemplateManager.getNotificationTemplate(displayName, locale, notificationChannel,
                     applicationUuid, tenantDomain);
-        } else {
+        } else if (registryBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+                applicationUuid, tenantDomain)) {
             return registryBasedTemplateManager.getNotificationTemplate(displayName, locale, notificationChannel,
+                    applicationUuid, tenantDomain);
+        } else {
+            return inMemoryTemplateManager.getNotificationTemplate(displayName, locale, notificationChannel,
                     applicationUuid, tenantDomain);
         }
     }
@@ -154,7 +165,15 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
                             applicationUuid, tenantDomain);
         }
 
-        return mergeAndRemoveDuplicates(dbBasedTemplates, registryBasedTemplates);
+        List<NotificationTemplate> inMemoryBasedTemplates = new ArrayList<>();
+        if (inMemoryTemplateManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
+                tenantDomain)) {
+            inMemoryBasedTemplates =
+                    inMemoryTemplateManager.listNotificationTemplates(templateType, notificationChannel,
+                            applicationUuid, tenantDomain);
+        }
+
+        return mergeAndRemoveDuplicates(dbBasedTemplates, registryBasedTemplates, inMemoryBasedTemplates);
     }
 
     @Override
@@ -165,8 +184,10 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
                 dbBasedTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
         List<NotificationTemplate> registryBasedTemplates =
                 registryBasedTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
+        List<NotificationTemplate> inMemoryBasedTemplates =
+                inMemoryTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
 
-        return mergeAndRemoveDuplicates(dbBasedTemplates, registryBasedTemplates);
+        return mergeAndRemoveDuplicates(dbBasedTemplates, registryBasedTemplates, inMemoryBasedTemplates);
     }
 
     @Override
@@ -203,15 +224,18 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     /**
      * Merges two lists and removes duplicates.
      *
-     * @param list1
-     * @param list2
+     * @param dbBasedTemplates
+     * @param registryBasedTemplates
+     * @param inMemoryTemplates
      * @return Merged list without duplicates.
      */
-    private <T> List<T> mergeAndRemoveDuplicates(List<T> list1, List<T> list2) {
+    private <T> List<T> mergeAndRemoveDuplicates(List<T> dbBasedTemplates, List<T> registryBasedTemplates,
+                                                 List<T> inMemoryTemplates) {
 
         Set<T> uniqueElements = new HashSet<>();
-        uniqueElements.addAll(list1);
-        uniqueElements.addAll(list2);
+        uniqueElements.addAll(dbBasedTemplates);
+        uniqueElements.addAll(registryBasedTemplates);
+        uniqueElements.addAll(inMemoryTemplates);
         return new ArrayList<>(uniqueElements);
     }
 }
