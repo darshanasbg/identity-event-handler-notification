@@ -70,7 +70,7 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("database");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof DBBasedTemplateManager);
+        assertTrue(templatePersistenceManager instanceof DefaultTemplateManager);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("invalid");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof DBBasedTemplateManager);
+        assertTrue(templatePersistenceManager instanceof DefaultTemplateManager);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn("");
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof DBBasedTemplateManager);
+        assertTrue(templatePersistenceManager instanceof DefaultTemplateManager);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class TemplatePersistenceManagerFactoryTest extends PowerMockTestCase {
         when(IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG)).thenReturn(null);
         TemplatePersistenceManager templatePersistenceManager =
                 templatePersistenceManagerFactory.getTemplatePersistenceManager();
-        assertTrue(templatePersistenceManager instanceof DBBasedTemplateManager);
+        assertTrue(templatePersistenceManager instanceof DefaultTemplateManager);
     }
 
     private static void setUpCarbonHome() {

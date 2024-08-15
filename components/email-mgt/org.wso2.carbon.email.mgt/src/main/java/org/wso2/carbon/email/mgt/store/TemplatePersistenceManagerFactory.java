@@ -46,7 +46,7 @@ public class TemplatePersistenceManagerFactory {
 
         String notificationTemplatesStorageType = IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG);
 
-        TemplatePersistenceManager persistenceManager = new DBBasedTemplateManager();
+        TemplatePersistenceManager persistenceManager = new DefaultTemplateManager();
 
         if (StringUtils.isNotBlank(notificationTemplatesStorageType)) {
             switch (notificationTemplatesStorageType) {
