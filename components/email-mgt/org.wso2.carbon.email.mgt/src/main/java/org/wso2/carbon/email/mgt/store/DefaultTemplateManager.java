@@ -22,8 +22,10 @@ import org.wso2.carbon.identity.governance.exceptions.notiification.Notification
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -130,7 +132,7 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
                             applicationUuid, tenantDomain);
         }
 
-        return mergeAndRemoveDuplicates(dbBasedTemplates, inMemoryBasedTemplates);
+        return mergeAndRemoveDuplicateTemplates(dbBasedTemplates, inMemoryBasedTemplates);
     }
 
     @Override
@@ -142,7 +144,7 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
         List<NotificationTemplate> inMemoryBasedTemplates =
                 inMemoryTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
 
-        return mergeAndRemoveDuplicates(dbBasedTemplates, inMemoryBasedTemplates);
+        return mergeAndRemoveDuplicateTemplates(dbBasedTemplates, inMemoryBasedTemplates);
     }
 
     @Override
@@ -180,5 +182,24 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
         uniqueElements.addAll(dbBasedTemplates);
         uniqueElements.addAll(inMemoryTemplates);
         return new ArrayList<>(uniqueElements);
+    }
+
+    /**
+     * Merges two NotificationTemplate lists and removes duplicate templates.
+     *
+     * @param dbBasedTemplates DbBasedTemplates
+     * @param inMemoryTemplates InMemoryTemplates
+     * @return Merged list without duplicates.
+     */
+    private List<NotificationTemplate> mergeAndRemoveDuplicateTemplates(
+            List<NotificationTemplate> dbBasedTemplates,
+            List<NotificationTemplate> inMemoryTemplates) {
+
+        Map<String, NotificationTemplate> templateMap = new HashMap<>();
+        dbBasedTemplates.forEach(template -> templateMap.put(template.getDisplayName(), template));
+
+        // Add in-memory templates, only if not already present
+        inMemoryTemplates.forEach(template -> templateMap.putIfAbsent(template.getDisplayName(), template));
+        return new ArrayList<>(templateMap.values());
     }
 }

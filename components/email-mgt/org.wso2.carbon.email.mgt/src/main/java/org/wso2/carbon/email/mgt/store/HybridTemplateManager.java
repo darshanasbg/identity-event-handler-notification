@@ -24,8 +24,10 @@ import org.wso2.carbon.identity.governance.exceptions.notiification.Notification
 import org.wso2.carbon.identity.governance.model.NotificationTemplate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -72,7 +74,8 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
         List<String> inMemoryTemplateTypes = inMemoryTemplateManager.listNotificationTemplateTypes(notificationChannel,
                 tenantDomain);
 
-        return mergeAndRemoveDuplicates(dbBasedTemplateTypes, registryBasedTemplateTypes, inMemoryTemplateTypes);
+        return mergeAndRemoveDuplicates(mergeAndRemoveDuplicates(dbBasedTemplateTypes, registryBasedTemplateTypes),
+                inMemoryTemplateTypes);
     }
 
     @Override
@@ -173,7 +176,8 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
                             applicationUuid, tenantDomain);
         }
 
-        return mergeAndRemoveDuplicates(dbBasedTemplates, registryBasedTemplates, inMemoryBasedTemplates);
+        return mergeAndRemoveDuplicateTemplates(mergeAndRemoveDuplicates(dbBasedTemplates, registryBasedTemplates),
+                inMemoryBasedTemplates);
     }
 
     @Override
@@ -187,7 +191,8 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
         List<NotificationTemplate> inMemoryBasedTemplates =
                 inMemoryTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
 
-        return mergeAndRemoveDuplicates(dbBasedTemplates, registryBasedTemplates, inMemoryBasedTemplates);
+        return mergeAndRemoveDuplicateTemplates(mergeAndRemoveDuplicates(dbBasedTemplates, registryBasedTemplates),
+                inMemoryBasedTemplates);
     }
 
     @Override
@@ -224,18 +229,34 @@ public class HybridTemplateManager implements TemplatePersistenceManager {
     /**
      * Merges two lists and removes duplicates.
      *
-     * @param dbBasedTemplates
-     * @param registryBasedTemplates
-     * @param inMemoryTemplates
+     * @param list1
+     * @param list2
      * @return Merged list without duplicates.
      */
-    private <T> List<T> mergeAndRemoveDuplicates(List<T> dbBasedTemplates, List<T> registryBasedTemplates,
-                                                 List<T> inMemoryTemplates) {
+    private <T> List<T> mergeAndRemoveDuplicates(List<T> list1, List<T> list2) {
 
         Set<T> uniqueElements = new HashSet<>();
-        uniqueElements.addAll(dbBasedTemplates);
-        uniqueElements.addAll(registryBasedTemplates);
-        uniqueElements.addAll(inMemoryTemplates);
+        uniqueElements.addAll(list1);
+        uniqueElements.addAll(list2);
         return new ArrayList<>(uniqueElements);
+    }
+
+    /**
+     * Merges two NotificationTemplate lists and removes duplicate templates.
+     *
+     * @param dbBasedTemplates DbBasedTemplates
+     * @param inMemoryTemplates InMemoryTemplates
+     * @return Merged list without duplicates.
+     */
+    private List<NotificationTemplate> mergeAndRemoveDuplicateTemplates(
+            List<NotificationTemplate> dbBasedTemplates,
+            List<NotificationTemplate> inMemoryTemplates) {
+
+        Map<String, NotificationTemplate> templateMap = new HashMap<>();
+        dbBasedTemplates.forEach(template -> templateMap.put(template.getDisplayName(), template));
+
+        // Add in-memory templates, only if not already present
+        inMemoryTemplates.forEach(template -> templateMap.putIfAbsent(template.getDisplayName(), template));
+        return new ArrayList<>(templateMap.values());
     }
 }
