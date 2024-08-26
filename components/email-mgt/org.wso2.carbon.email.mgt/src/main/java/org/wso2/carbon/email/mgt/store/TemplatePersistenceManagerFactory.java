@@ -44,6 +44,11 @@ public class TemplatePersistenceManagerFactory {
      */
     public TemplatePersistenceManager getTemplatePersistenceManager() {
 
+        return new DefaultTemplateManager();
+    }
+
+    static TemplatePersistenceManager getPersistenceManager() {
+
         String notificationTemplatesStorageType = IdentityUtil.getProperty(NOTIFICATION_TEMPLATES_STORAGE_CONFIG);
 
         TemplatePersistenceManager persistenceManager = new DefaultTemplateManager();

@@ -37,21 +37,22 @@ import java.util.Set;
  */
 public class DefaultTemplateManager implements TemplatePersistenceManager {
 
-    private final TemplatePersistenceManager dbBasedTemplateManager = new DBBasedTemplateManager();
+    private final TemplatePersistenceManager templatePersistenceManager =
+            TemplatePersistenceManagerFactory.getPersistenceManager();
     private final TemplatePersistenceManager inMemoryTemplateManager = new InMemoryBasedTemplateManager();
 
     @Override
     public void addNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        dbBasedTemplateManager.addNotificationTemplateType(displayName, notificationChannel, tenantDomain);
+        templatePersistenceManager.addNotificationTemplateType(displayName, notificationChannel, tenantDomain);
     }
 
     @Override
     public boolean isNotificationTemplateTypeExists(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        return dbBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
+        return templatePersistenceManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
                 tenantDomain) ||
                 inMemoryTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel,
                         tenantDomain);
@@ -61,7 +62,7 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
     public List<String> listNotificationTemplateTypes(String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        List<String> dbBasedTemplateTypes = dbBasedTemplateManager.listNotificationTemplateTypes(notificationChannel,
+        List<String> dbBasedTemplateTypes = templatePersistenceManager.listNotificationTemplateTypes(notificationChannel,
                 tenantDomain);
         List<String> inMemoryTemplateTypes = inMemoryTemplateManager.listNotificationTemplateTypes(notificationChannel,
                 tenantDomain);
@@ -73,8 +74,8 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
     public void deleteNotificationTemplateType(String displayName, String notificationChannel, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        if (dbBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel, tenantDomain)) {
-            dbBasedTemplateManager.deleteNotificationTemplateType(displayName, notificationChannel, tenantDomain);
+        if (templatePersistenceManager.isNotificationTemplateTypeExists(displayName, notificationChannel, tenantDomain)) {
+            templatePersistenceManager.deleteNotificationTemplateType(displayName, notificationChannel, tenantDomain);
         }
     }
 
@@ -82,7 +83,7 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
     public void addOrUpdateNotificationTemplate(NotificationTemplate notificationTemplate, String applicationUuid,
                                                 String tenantDomain) throws NotificationTemplateManagerServerException {
 
-        dbBasedTemplateManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid, tenantDomain);
+        templatePersistenceManager.addOrUpdateNotificationTemplate(notificationTemplate, applicationUuid, tenantDomain);
     }
 
     @Override
@@ -90,7 +91,7 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
                                                 String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        return dbBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+        return templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain) ||
                 inMemoryTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                         applicationUuid, tenantDomain);
@@ -101,9 +102,9 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
                                                         String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        if (dbBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+        if (templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain)) {
-            return dbBasedTemplateManager.getNotificationTemplate(displayName, locale, notificationChannel,
+            return templatePersistenceManager.getNotificationTemplate(displayName, locale, notificationChannel,
                     applicationUuid, tenantDomain);
         } else {
             return inMemoryTemplateManager.getNotificationTemplate(displayName, locale, notificationChannel,
@@ -117,10 +118,10 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
             throws NotificationTemplateManagerServerException {
 
         List<NotificationTemplate> dbBasedTemplates = new ArrayList<>();
-        if (dbBasedTemplateManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
+        if (templatePersistenceManager.isNotificationTemplateTypeExists(templateType, notificationChannel,
                 tenantDomain)) {
             dbBasedTemplates =
-                    dbBasedTemplateManager.listNotificationTemplates(templateType, notificationChannel, applicationUuid,
+                    templatePersistenceManager.listNotificationTemplates(templateType, notificationChannel, applicationUuid,
                             tenantDomain);
         }
 
@@ -140,7 +141,7 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
             throws NotificationTemplateManagerServerException {
 
         List<NotificationTemplate> dbBasedTemplates =
-                dbBasedTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
+                templatePersistenceManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
         List<NotificationTemplate> inMemoryBasedTemplates =
                 inMemoryTemplateManager.listAllNotificationTemplates(notificationChannel, tenantDomain);
 
@@ -152,9 +153,9 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
                                            String applicationUuid, String tenantDomain)
             throws NotificationTemplateManagerServerException {
 
-        if (dbBasedTemplateManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
+        if (templatePersistenceManager.isNotificationTemplateExists(displayName, locale, notificationChannel,
                 applicationUuid, tenantDomain)) {
-            dbBasedTemplateManager.deleteNotificationTemplate(displayName, locale, notificationChannel, applicationUuid,
+            templatePersistenceManager.deleteNotificationTemplate(displayName, locale, notificationChannel, applicationUuid,
                     tenantDomain);
         }
     }
@@ -163,8 +164,8 @@ public class DefaultTemplateManager implements TemplatePersistenceManager {
     public void deleteNotificationTemplates(String displayName, String notificationChannel, String applicationUuid,
                                             String tenantDomain) throws NotificationTemplateManagerServerException {
 
-        if (dbBasedTemplateManager.isNotificationTemplateTypeExists(displayName, notificationChannel, tenantDomain)) {
-            dbBasedTemplateManager.deleteNotificationTemplates(displayName, notificationChannel, applicationUuid,
+        if (templatePersistenceManager.isNotificationTemplateTypeExists(displayName, notificationChannel, tenantDomain)) {
+            templatePersistenceManager.deleteNotificationTemplates(displayName, notificationChannel, applicationUuid,
                     tenantDomain);
         }
     }
