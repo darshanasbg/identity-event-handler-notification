@@ -24,7 +24,6 @@ import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.stratos.common.exception.StratosException;
 import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 
-@Deprecated
 public class TenantManagementListener implements TenantMgtListener {
 
     private static final int EXEC_ORDER = 21;
