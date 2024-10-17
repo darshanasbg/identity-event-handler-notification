@@ -159,7 +159,6 @@ public interface EmailTemplateManager {
      * @param tenantDomain
      * @throws I18nEmailMgtException
      */
-    @Deprecated
     void addDefaultEmailTemplates(String tenantDomain) throws I18nEmailMgtException;
 
     /**
