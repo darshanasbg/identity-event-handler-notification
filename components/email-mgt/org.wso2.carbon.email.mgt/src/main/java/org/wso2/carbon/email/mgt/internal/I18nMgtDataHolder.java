@@ -37,6 +37,7 @@ public class I18nMgtDataHolder{
     private List<NotificationTemplate> defaultEmailTemplates = new ArrayList<>();
     private List<NotificationTemplate> defaultSMSTemplates = new ArrayList<>();
     private List<String> legacyTenants = new ArrayList<>();
+    private boolean isUnicodeDataType;
 
     private static I18nMgtDataHolder instance = new I18nMgtDataHolder();
 
@@ -159,5 +160,25 @@ public class I18nMgtDataHolder{
     public List<String> getLegacyTenants() {
 
         return legacyTenants;
+    }
+
+    /**
+     * Set the unicode data type status.
+     *
+     * @param isUnicodeDataType Unicode data type status.
+     */
+    public void setUnicodeDataType(boolean isUnicodeDataType) {
+
+        this.isUnicodeDataType = isUnicodeDataType;
+    }
+
+    /**
+     * Get the unicode data type status.
+     *
+     * @return Unicode data type status.
+     */
+    public boolean isUnicodeDataType() {
+
+        return isUnicodeDataType;
     }
 }
